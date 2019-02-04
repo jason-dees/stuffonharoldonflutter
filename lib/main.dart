@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-//import 'package:image/image.dart';
 
 void main() => runApp(MyApp());
 
@@ -34,7 +34,6 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _BaseImageUrl = 'https://stuffonharold.azurewebsites.net/api/image/random';
   String _imageUrl = _BaseImageUrl;
   List<int> _imageBytes = new List<int>();
-  //I need someway to load an image on instantiate
 
   Future<void> _incrementCounter() async {
     _imageUrl = setImageUrl(_counter++);
@@ -106,7 +105,9 @@ class HaroldWidget extends StatelessWidget {
   HaroldWidget(this.haroldImageBytes);
 
   Widget build(BuildContext context){
-
+    if(haroldImageBytes.length == 0){//To account for initial load
+      return Image.asset('assets/iguazu.jpg');
+    }
     return Image.memory(Uint8List.fromList(haroldImageBytes));
   }
 
