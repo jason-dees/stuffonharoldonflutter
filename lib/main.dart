@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 //import 'package:image/image.dart';
 
@@ -22,15 +23,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -41,38 +33,42 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   static const String _BaseImageUrl = 'https://stuffonharold.azurewebsites.net/api/image/random';
   String _imageUrl = _BaseImageUrl;
+  List<int> _imageBytes = new List<int>();
+  //I need someway to load an image on instantiate
 
-  void _incrementCounter() {
+  Future<void> _incrementCounter() async {
+    _imageUrl = setImageUrl(_counter++);
+    _imageBytes = await getImageBytes(_imageUrl);
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
-      setImageUrl();
-      _imageUrl = '$_imageUrl&$_counter';
     });
   }
 
-  void setImageUrl(){
+  String setImageUrl(int counter){
     int width = MediaQuery.of(context).size.width.toInt();
     int height = MediaQuery.of(context).size.height.toInt();
-    _imageUrl = '$_BaseImageUrl?width=$width&height=$height';
+    return '$_BaseImageUrl?width=$width&height=$height&$counter';
   }
 
-  Future<http.Response> getImageHttpResponse() async{
-    return await http.get(_imageUrl);
+  Future<http.Response> getImageHttpResponse(String imageUrl) async{
+    return await http.get(imageUrl);
   }
 
-  Future<Image> getFileImage() async{
-    final response = await getImageHttpResponse();
-    Image image = Image.memory(response.bodyBytes);
-    return image;
+  Future<List<int>> getImageBytes(String imageUrl) async{
+    final response = await getImageHttpResponse(imageUrl);
+    return response.bodyBytes;
   }
 
   @override
   Widget build(BuildContext context) {
+    if(_imageBytes.length == 0){
+
+    }
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -86,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             HaroldWidget(
-              _imageUrl,
+              _imageBytes,
             ),
             Text(
               _imageUrl,
@@ -102,19 +98,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
-
-
 }
 
 class HaroldWidget extends StatelessWidget {
-  //So i can do like i do with the js and just keep two harold images around and get rid of one when done
-  //find someway to only disappear the current harold when the new one is ready
-  final String haroldUrl;
+  final List<int> haroldImageBytes;
 
-  HaroldWidget(this.haroldUrl);
+  HaroldWidget(this.haroldImageBytes);
 
   Widget build(BuildContext context){
-    return Image.network(haroldUrl);
+
+    return Image.memory(Uint8List.fromList(haroldImageBytes));
   }
 
 }
