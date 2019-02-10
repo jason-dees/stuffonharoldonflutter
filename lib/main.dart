@@ -77,34 +77,36 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             HaroldWidget(
-              _imageBytes,
-            ),
-            Text(
-              _imageUrl,
-              style: Theme.of(context).textTheme.display1,
+                _imageBytes,
+                _incrementCounter
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
 
 class HaroldWidget extends StatelessWidget {
   final Uint8List haroldImageBytes;
+  final GestureTapCallback onTap;
 
-  HaroldWidget(this.haroldImageBytes);
+  HaroldWidget(this.haroldImageBytes, this.onTap);
 
   Widget build(BuildContext context){
+    Image haroldImage;
     if(haroldImageBytes.length == 0){//To account for initial load
-      return Image.asset('assets/iguazu.jpg');
+      haroldImage = Image.asset('assets/iguazu.jpg');
     }
-    return Image.memory(haroldImageBytes);
+    else {
+      haroldImage = Image.memory(haroldImageBytes);
+    }
+    return GestureDetector(
+      onTap: (){
+        onTap();
+        },
+      child: haroldImage
+    );
   }
 
 }
